@@ -29,11 +29,11 @@ def get_points_on_sphere(center=(0., 0., 0.), radius=1., n=100):
     return pts
 
 
-def shrake_rupley(atoms, probe_radius=1.4, n_samples=150, verbose=False):
+def calculate_surface_area(atoms, probe_radius=1.4, n_samples=150, verbose=False):
     n_atoms = len(atoms)
     centers = []
     radii = []
-    results = []
+    areas = []
 
     for idx, atom in atoms.iterrows():
         centers.append((atom["x"], atom["y"], atom["z"]))
@@ -45,7 +45,7 @@ def shrake_rupley(atoms, probe_radius=1.4, n_samples=150, verbose=False):
                         ascii=False,
                         desc="calculating surface area")
     else:
-        iterator = zip(centers[:1], radii[:1])
+        iterator = zip(centers, radii)
 
     for center, radius in iterator:
         pts = get_points_on_sphere(center=center,
@@ -59,6 +59,36 @@ def shrake_rupley(atoms, probe_radius=1.4, n_samples=150, verbose=False):
         n_outsiders = np.sum(np.all(d2 >= (r2 * 0.99), axis=1))  # the 0.99 factor to account for numerical errors in the calculation of d2
 
         area = 4 * pi * ((radius + probe_radius) ** 2) * n_outsiders / n_samples
-        results.append(area)
+        areas.append(area)
 
-    return results
+    return pd.concat([
+        atoms.chainid,
+        atoms.resid,
+        atoms.resname,
+        pd.Series(areas, index=atoms.index, name="area")
+    ], axis=1)
+
+
+def parse_results_by_residue(results):
+    resinfo = []
+    areas = []
+
+    for idx, row in results.iterrows():
+        res = (row["chainid"], row["resid"], row["resname"])
+        if res not in resinfo:
+            resinfo.append(res)
+
+    for res in resinfo:
+        area = results[(results.chainid == res[0]) &
+                       (results.resid == res[1]) &
+                       (results.resname == res[2])].area
+        areas.append(sum(area))
+
+    resinfo = np.array(resinfo)
+
+    return pd.DataFrame({
+        "chainid": resinfo[:, 0],
+        "resid": resinfo[:, 1],
+        "resname": resinfo[:, 2],
+        "area": areas
+    })
