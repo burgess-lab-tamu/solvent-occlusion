@@ -1,4 +1,14 @@
-__pycache__
-.ipynb_checkpoints
-.remote-sync.json
+# byte-compiled
+__pycache__/
+
+# distribution & packaging
+build/
+dist/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
 *.log
+
+# configs file for Atom editor
+.remote-sync.json
