@@ -55,7 +55,7 @@ def fetch_pdb_from_rcsb(pdbid):
     return lines
 
 
-def parse(pdb, verbose=False):
+def parse(pdb, chainids=None, verbose=False):
     try:
         lines = read_local_pdb_file(pdb)
     except FileNotFoundError:
@@ -69,7 +69,7 @@ def parse(pdb, verbose=False):
     data = pd.DataFrame(columns=columns)
 
     if verbose:
-        iterator = tqdm(lines, ascii=False, desc="parsing {}".format(pdb))
+        iterator = tqdm(lines, ascii=False, desc="Parsing {}".format(pdb))
     else:
         iterator = lines
 
@@ -96,4 +96,9 @@ def parse(pdb, verbose=False):
 
         data = data.append(atom, ignore_index=True)  # note that pd.DataFrame.append method is not in-place
 
-    return data.drop("altloc", axis=1)  # drop the altloc column since it is useless for calculating SASA
+    data = data.drop("altloc", axis=1)  # drop the altloc column since it is useless for calculating SASA
+
+    if chainids is None:
+        return data
+    else:
+        return data[data.chainid.isin(chainids)]
