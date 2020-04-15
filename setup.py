@@ -7,8 +7,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="solvent-occlusion-lyu18",
-    version="0.1",
+    name="solvent-occlusion",
+    version="0.1.1",
     author="Rui-Liang Lyu",
     author_email="lyu.chemistry@tamu.edu",
 

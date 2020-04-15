@@ -12,3 +12,6 @@ dist/
 
 # configs file for Atom editor
 .remote-sync.json
+
+# temporary files
+tmp/

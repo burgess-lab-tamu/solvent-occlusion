@@ -24,7 +24,16 @@ def get_occlusions(atoms, chainids=None, verbose=False):
                                    verbose=verbose,
                                    _desc="Calc areas of chain {}".format(chainid)))
 
-    areas_sgl = pd.concat(areas_sgl)
+    areas_sgl = pd.concat(areas_sgl).reset_index()
+
+    # Important: sort areas_sgl so that it is aligned with areas_all
+    indices = [0] * len(areas_sgl)
+    for idx, row in areas_sgl.iterrows():
+        indices[idx] = areas_all.loc[(areas_all.chainid == row["chainid"]) &
+                                     (areas_all.resid == row["resid"])].index[0]
+
+    areas_sgl.index = indices
+    areas_sgl = areas_sgl.sort_index()
 
     occlusions = []
     for area_sgl, area_all in zip(areas_sgl.area, areas_all.area):
