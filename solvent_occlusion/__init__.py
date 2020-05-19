@@ -2,5 +2,5 @@
 #
 
 from .parser import parse
-from .shrake_rupley import get_areas
+from .shrake_rupley import shrake_rupley
 from .solvent_occlusion import get_occlusions

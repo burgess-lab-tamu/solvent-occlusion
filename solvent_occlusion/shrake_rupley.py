@@ -7,7 +7,6 @@
 import numpy as np
 from numpy import pi, sin, cos, sqrt
 import pandas as pd
-from tqdm import tqdm
 
 from .atomic_radii import get_radius
 
@@ -53,7 +52,7 @@ def parse_results_by_residue(results):
     })
 
 
-def get_areas(atoms, probe_radius=1.4, n_samples=150, by_residue=False, verbose=False, _desc=None):
+def shrake_rupley(atoms, probe_radius=1.4, n_samples=150, by_residue=False):
     n_atoms = len(atoms)
     centers = []
     radii = []
@@ -63,15 +62,7 @@ def get_areas(atoms, probe_radius=1.4, n_samples=150, by_residue=False, verbose=
         centers.append((atom["x"], atom["y"], atom["z"]))
         radii.append(get_radius(atom["resname"], atom["atomname"], atom["element"]))
 
-    if verbose:
-        iterator = tqdm(zip(centers, radii),
-                        total=n_atoms,
-                        ascii=False,
-                        desc=_desc)
-    else:
-        iterator = zip(centers, radii)
-
-    for center, radius in iterator:
+    for center, radius in zip(centers, radii):
         pts = get_points_on_sphere(center=center,
                                    radius=(radius + probe_radius),
                                    n=n_samples)
@@ -96,3 +87,9 @@ def get_areas(atoms, probe_radius=1.4, n_samples=150, by_residue=False, verbose=
         return parse_results_by_residue(results)
     else:
         return results
+
+
+def shrake_rupley_mp(atoms, queue, label, probe_radius=1.4, n_samples=150,
+                     by_residue=False):
+    output = shrake_rupley(atoms, probe_radius, n_samples, by_residue)
+    queue.put((label, output))

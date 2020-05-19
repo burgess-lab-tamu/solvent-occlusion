@@ -6,7 +6,6 @@
 
 import pandas as pd
 from urllib.request import urlopen
-from tqdm import tqdm
 
 
 natural_aas = [
@@ -55,7 +54,7 @@ def fetch_pdb_from_rcsb(pdbid):
     return lines
 
 
-def parse(pdb, chainids=None, verbose=False):
+def parse(pdb, chainids=None):
     try:
         lines = read_local_pdb_file(pdb)
     except FileNotFoundError:
@@ -68,12 +67,7 @@ def parse(pdb, chainids=None, verbose=False):
 
     data = pd.DataFrame(columns=columns)
 
-    if verbose:
-        iterator = tqdm(lines, ascii=False, desc="Parsing {}".format(pdb))
-    else:
-        iterator = lines
-
-    for line in iterator:
+    for line in lines:
         atom = parse_atom_line(line)
 
         # change HSE to HIS
